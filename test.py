@@ -1,16 +1,16 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 
-def generate_graph(index_dict={"R":(0,0),"B":(0,1),"G":(1,0),"Y":(1,1)}):
+def generate_graph(index_dict={"R":(0,0),"B":(0,1),"G":(1,0),"Y":(1,1),"P":(2,0)}):
     #依照index_dict製圖
     G = nx.Graph()  
 
-    Color_list = ['red', 'blue', 'green', "yellow"]
-    category_list = ['R', 'B', 'G', "Y"]
-    direction_list = [1, 2, 3, 4]  # 這裡是數字，需要轉換成字串來拼接
+    Color_list = ['red', 'blue', 'green', "yellow","purple"]
+    category_list = ['R', 'B', 'G', "Y", "P"]
+    direction_list = [1, 2, 3, 4, 5, 6]  # 這裡是數字，需要轉換成字串來拼接
 
-    for category in range(4):
-        for direction in range(4):
+    for category in range(len(category_list)):
+        for direction in range(len(direction_list)):
             name = category_list[category] + str(direction_list[direction])  # 轉換 direction 為字串
             G.add_node(name, 
                     category=category_list[category], 
@@ -24,25 +24,31 @@ def generate_graph(index_dict={"R":(0,0),"B":(0,1),"G":(1,0),"Y":(1,1)}):
     G.nodes["Y2"]["label"]='R'
     G.nodes["B4"]["label"]='G'
 
+    #這裡未來要決定各版塊內部連接
     G.add_edges_from([("R1", "R3"), ("R2", "R4")])
     G.add_edges_from([("B1", "B4"), ("B2", "B3")])
     G.add_edges_from([("G1", "G3")])
     G.add_edges_from([("Y1", "Y2"),("Y4", "Y2"),("Y1", "Y4")])
+
     keylist = list(index_dict.keys())
     valuelist = list(index_dict.values())
-    for i in range(4):
-        for j in range(i+1,4):
+
+    for i in range(len(index_dict)):
+        for j in range(i+1,len(index_dict)):
             x_1,y_1 = valuelist[i]
             x_2,y_2 = valuelist[j]
-            if x_1-x_2==1 and y_1-y_2==0:
-                G.add_edge(keylist[i]+"3",keylist[j]+"1")
-            elif x_1-x_2==-1 and y_1-y_2==0:
-                G.add_edge(keylist[i]+"1",keylist[j]+"3")
-            elif x_1-x_2==0 and y_1-y_2==-1:
-                G.add_edge(keylist[i]+"2",keylist[j]+"4")
+            if x_1-x_2==0 and y_1-y_2==-1:
+                G.add_edge(keylist[i]+"1",keylist[j]+"4")
+            elif x_1-x_2==1 and y_1-y_2==-1:
+                G.add_edge(keylist[i]+"2",keylist[j]+"5")
+            elif x_1-x_2==1 and y_1-y_2==0:
+                G.add_edge(keylist[i]+"3",keylist[j]+"6")
             elif x_1-x_2==0 and y_1-y_2==1:
-                G.add_edge(keylist[i]+"4",keylist[j]+"2")
-
+                G.add_edge(keylist[i]+"4",keylist[j]+"1")
+            elif x_1-x_2==-1 and y_1-y_2==1:
+                G.add_edge(keylist[i]+"5",keylist[j]+"2")
+            elif x_1-x_2==-1 and y_1-y_2==0:
+                G.add_edge(keylist[i]+"6",keylist[j]+"3")
     return G
 
 
@@ -73,7 +79,7 @@ def node_connected_label(G,Node):
 def Legal_movement(index_dict, plate):
     #在index_dict中plate可移動位置
     new_index_set = set()  
-    adj_list = [(0,1), (1,0), (-1,0), (0,-1)]
+    adj_list = [(0,1), (1,0), (-1,0), (0,-1), (-1,1), (1,-1)]
     occupied_positions = set(index_dict.values())  # 轉為 set 加速查找
     for key, (x1, y1) in index_dict.items():
         if key == plate:
@@ -85,9 +91,7 @@ def Legal_movement(index_dict, plate):
     return list(new_index_set) 
 
 
-
-
-index_dict={"R":(0,0),"B":(1,0),"G":(0,1),"Y":(1,1)}
+index_dict={"R":(0,0),"B":(0,1),"G":(1,0),"Y":(1,1),"P":(2,0)}
 
 G = generate_graph(index_dict)
 plot_graph(G)
